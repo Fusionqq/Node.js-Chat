@@ -1,0 +1,153 @@
+html, body {
+    font-family: Ubuntu, sans-serif;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: url(pic/polygon-wallpaper-5.jpg) no-repeat center center fixed;
+     background-size: 100%
+}
+
+.unauthorized {
+    /*z-index: 10;*/
+    display: block;
+    position: absolute;
+    top: 40%;
+    bottom: 40%;
+    left: 35%;
+    right: 35%;
+}
+
+input {
+    width: 100%;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    -moz-box-sizing:border-box;
+    -o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    border: 1px solid #DDD;
+}
+
+.start {
+    width: 100%;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    -moz-box-sizing:border-box;
+    -o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    border: 1px solid #DDD;
+    margin-top: 2px;
+}
+
+.sendMess {
+    width: 25%;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    -moz-box-sizing:border-box;
+    -o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    border: 1px solid #DDD;
+    margin-top: 2px;
+}
+
+#password.invalid {
+    box-shadow: 0 0 10px 0 red;
+    -webkit-box-shadow: 0 0 10px 0 red;
+    -moz-box-shadow: 0 0 10px 0 red;
+    border: 1px solid #F55;
+}
+input:focus {
+    box-shadow: 0 0 10px 0 gray;
+    -webkit-box-shadow: 0 0 10px 0 gray;
+    -moz-box-shadow: 0 0 10px 0 gray;
+    outline: none;
+    border: 1px solid #DDD;
+}
+/*form>div {
+    opacity: 0.4;
+    text-align: center;
+    width: 100%;
+}
+form.unauthorized ~ * {
+    display: none;
+}*/
+/*body>div {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15%;
+    min-height: 100px;
+}*/
+
+
+.nick {
+    text-align: center;
+    width: 100%;
+}
+
+.demo {
+   /*display: none;*/
+    /*z-index: -10;*/
+    width: 600px;
+    margin: 20px auto;
+    padding: 10px;
+    color: #4F6B72;
+    font-family: "PT Sans", Verdana, Arial, sans-serif;
+    font-size: 13px;
+}
+ 
+.chatWindow .messages{
+    height: 300px;
+    border: 1px solid #d4d4d4;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding: 5px;
+}
+ 
+.chatWindow .messages .user{
+    color: #B22222;
+}
+ 
+.chatWindow .message{
+    width: 70%;
+}
+ 
+.chatWindow .panel{
+    margin-top: 20px;
+
+}
+ 
+#message_text{
+    width: 65%;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.msgMe {
+    margin: 5px;
+    border: 1px solid;
+    width: 50%;
+    border-radius: 10px;
+    padding: 6px;
+    border-color: red;
+}
+
+.msgAll {
+    margin: 5px;
+    border: 1px solid;
+    width: 50%;
+    border-radius: 10px;
+    padding: 6px;
+    border-color: gray;
+}
+
+.msgDel {
+    background-color: orange;
+    margin: 5px;
+    border: 1px solid;
+    width: 50%;
+    border-radius: 10px;
+    padding: 6px;
+    border-color: orange;
+}
