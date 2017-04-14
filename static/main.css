@@ -105,17 +105,16 @@ form.unauthorized ~ * {
     padding: 5px;
 }
  
-.chatWindow .messages .user{
+/* .chatWindow .messages .user{
     color: #B22222;
-}
+} */
  
-.chatWindow .message{
+/* .chatWindow .message{
     width: 70%;
-}
+}  */
  
-.chatWindow .panel{
+.panel{
     margin-top: 20px;
-
 }
  
 #message_text{

@@ -21,31 +21,32 @@
  
         <div class="demo" ng-show="chat.showChatPage">
             <h1>Chat</h1>
-
-            <div ng-repeat="on in chat.usersOnline">
-                {{on.name}} : {{on.online}}
-            </div>
-
+            
             <div class="chatWindow">
+                <div>Users online: {{chat.countOnline}}</div>
+                <div ng-repeat="on in chat.usersOnline">
+                    {{on.name}} {{on.online}}
+                </div>
+
                 <div class="messages" id="messages">
                     <div ng-repeat="m in chat.mess">
                         <div>
-                            <div ng-class="{ 'msgMe' : m.me, 'msgAll' : !m.me, 'msgDel': m.del }">
+                            <div ng-class="{ 'msgMe' : m.me, 'msgAll' : !m.me, 'msgDel' : m.del}">
                                 <span ng-bind="m.date"></span>
                                 <span ng-bind="m.name"></span>
                                 <span ng-bind="m.text"></span>
-                                {{m.id}}
-                                <button ng-hide="!m.me" ng-click='chat.setDelMess(m.id)'></button>
+                                <span ng-bind="m.id"></span>
+                               <button ng-hide="!m.me" ng-click='chat.setDelMess(m.id)'></button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="nick" ng-bind="chat.yourLogin"></div>
+            </div>
+            <div class="nick" ng-bind="chat.yourLogin"></div>
                 <div class="panel">
                     <input type="text" id="message_text" ng-model="chat.yourMess">
                     <button type="button" id="message_btn" class="sendMess" ng-click="chat.sendMess()">Отправить</button>
                 </div>
-            </div>
         </div>
     </body>
 </html>

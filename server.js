@@ -5,7 +5,7 @@ var app = express();
 var server = require('http').Server(app); 
 var io = require('socket.io')(server); 
 
-server.listen(PORT, function(){
+server.listen(PORT, function() {
     console.log('listening at port ' + PORT);
 });
 
@@ -28,7 +28,8 @@ db.once('open', function() {
 var userSchema = new mongoose.Schema({
    userName: String,
    userPass: String,
-   date: String
+   date: String,
+   online: Boolean
 });
 
 var usersMessageSchema = new mongoose.Schema({
@@ -39,17 +40,12 @@ var usersMessageSchema = new mongoose.Schema({
    date: String
 });
 
-var usersOnlineSchema = new mongoose.Schema({
-    userName: String,
-    userPass: String,
-    online: String
-});
-
 var modelU = mongoose.model('modelUser', userSchema);
 
 var modelMess = mongoose.model('modelMessages', usersMessageSchema);
 
-var modelOnline = mongoose.model('modelUserOnline', usersOnlineSchema);
+modelMess.remove(function (err, users) {});
+modelU.remove(function (err, users) {});
 
 function findUser (user, callback) {
     modelU.find({userName: user}, function (err, users) {
@@ -73,52 +69,43 @@ function checkUser (user, password, callback) {
     });
 };
 
-function registrUser (user, password, now, callback) {
+function registrUser (user, callback) {
     findUser(user, function (found) {
         if (found) {
             callback(false);
         } else {
-            var newUser = new modelU ({
-                userName: user, 
-                userPass: password,
-                date: now
-            });
-            newUser.save(function (err) {
-                if (err) {
-                    return handleError(err);
-                };
-            });
             callback (true);
         }
     });
 };
 
 function checkUserOnline (user, password, callback) {
-    modelOnline.find({userName: user}, function (err, users) {
-        callback(users.length !== 0  && users[0].userPass == password);
+    modelU.find({userName: user}, function (err, users) {
+        if(users.length == 0) {
+            callback(false);
+        };
+        if(users.length != 0) {
+            callback(users[0].online === true && users[0].userPass == password);
+        };
     });   
 };
 
-modelMess.remove(function (err, users) {});
-modelU.remove(function (err, users) {});
-modelOnline.remove(function (err, users) {});
-
+//bug with server dissconnect :(
 io.on('connection', function (client) {
-
     client.on('message', function (message) {
         client.emit('messageToMe', message);
         client.broadcast.emit('messageToAll', message);
     });
 
-    client.on('messageToSave', function(mess) {
-        var newMessage = new modelMess({
-            userName: mess.userName,
-            userMess: mess.userMess,
-            me: mess.me,
-            id: mess.id,
-            date: mess.date
+    /*client.on('deleteMess', function (index) {
+        modelMess.find({id: index}, function (err, message) {                
+            client.emit('deleteMess', message);
+            client.broadcast.emit('deleteMess', message);
         });
-        newMessage.save(function (err) {
+    });*/
+
+    client.on('messageToSave', function(mess) {
+        modelMess.create({ userName: mess.userName, userMess: mess.userMess, me: mess.me, id: mess.id, date: mess.date }, function (err) {
             if (err) {
                 return handleError(err);
             };
@@ -130,11 +117,20 @@ io.on('connection', function (client) {
             if(!success) {
                 checkUser(info.login, info.password, function(success) {
                     if(success) {
-                        modelOnline.create({userName: info.login, userPass: info.password, online: 'online'}, function (err) {
+                        console.log(info.login + info.password);
+
+                        modelU.find({ userName: info.login }, function (err, user) {
                             if (err) {
                                 return handleError(err);
                             };
-                            modelOnline.find(function (err, users) {
+                            client.emit('authIsSuccess', user);
+                        });
+
+                        modelU.update({ userName: info.login }, { $set: { online: true } }, function (err) {
+                            if (err) {
+                                return handleError(err);
+                            };
+                            modelU.find(function (err, users) {
                                 if (err) {
                                     return handleError(err);
                                 };
@@ -143,27 +139,19 @@ io.on('connection', function (client) {
                             });
                         });
 
-                        console.log(info.login + info.password);
-
-                        modelU.find(function (err, users) {
-                            if (err) {
-                                return handleError(err);
-                            };
-                            client.emit('authIsSuccess', users, info.login);
-                        });
-
                         client.on('disconnect', function () { 
-                            modelOnline.remove({userName: info.login}, function (err) { 
+                            modelU.update({ userName: info.login }, { $set: { online: false } }, function (err) {
                                 if (err) {
                                     return handleError(err);
                                 };
-                            }); 
-                            modelOnline.find(function(err, users) {
-                                if (err) {
-                                    return handleError(err);
-                                };
-                                client.broadcast.emit('onlineUserList', users);
-                            });         
+                                modelU.find(function (err, users) {
+                                    if (err) {
+                                        return handleError(err);
+                                    };
+                                    client.broadcast.emit('onlineUserList', users);
+                                    console.log(users);
+                                }); 
+                            });        
                         });
                     } else {
                         client.emit('authIsNotSuccess', 'Неверное имя или пароль');
@@ -176,13 +164,18 @@ io.on('connection', function (client) {
     });
 
     client.on('registration', function(info) {
-        registrUser(info.login, info.password, info.date,  function(success) {
+        registrUser(info.login, function(success) {
             if(success) {
-                modelOnline.create({userName: info.login, userPass: info.password, online: 'online'}, function (err) {
+
+                client.emit('registrIsSuccess');
+
+                console.log(info.login + info.password);
+
+                modelU.create({ userName: info.login, userPass: info.password, date: info.date, online: true }, function (err) {
                     if (err) {
                         return handleError(err);
                     };
-                    modelOnline.find(function (err, users) {
+                    modelU.find(function (err, users) {
                         if (err) {
                             return handleError(err);
                         };
@@ -190,23 +183,20 @@ io.on('connection', function (client) {
                         client.broadcast.emit('onlineUserList', users);
                     });
                 });
-
-                console.log(info.login + info.password);
-
-                client.emit('registrIsSuccess');
-
+    
                 client.on('disconnect', function () { 
-                    modelOnline.remove({userName: info.login}, function (err) {
+                    modelU.update({ userName: info.login }, { $set: { online: false } }, function (err) {
                         if (err) {
                             return handleError(err);
-                        };
-                    }); 
-                    modelOnline.find(function(err, users) {
-                        if (err) {
-                            return handleError(err);
-                        };
-                        client.broadcast.emit('onlineUserList', users);
-                    });         
+                        };    
+                        modelU.find(function(err, users) {
+                            if (err) {
+                                return handleError(err);
+                            };
+                            client.broadcast.emit('onlineUserList', users);
+                            console.log(users);
+                        }); 
+                    });             
                 });
             } else {
                 client.emit('authIsNotSuccess', 'Имя занято');
@@ -214,12 +204,12 @@ io.on('connection', function (client) {
         });
     });
 
-    client.on('loadMessHistory', function(users, name) {
+    client.on('loadMessHistory', function(user) {
         modelMess.find(function (err, messages) {
             if (err) {
                 return handleError(err);
             };
-            client.emit('messageToSave', messages, users, name);
+            client.emit('messHistory', messages, user);
         });  
     });
 });
@@ -228,13 +218,11 @@ modelMess.find(function (err, users) {
     console.log(users);
 });
 
-modelOnline.find(function (err, users) {
-    console.log(users);
-});
-
 modelU.find(function (err, users) {
     console.log(users);
 });
+
+
 
 
 
