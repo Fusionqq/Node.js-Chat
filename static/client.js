@@ -20,10 +20,10 @@ app.controller('appController', function($scope) {
     };
 
     socket.on('authIsSuccess', function(user) {
+        socket.emit('loadMessHistory', user);
         vm.authError = false;
         vm.hideLogPage = true;
         vm.showChatPage = true;
-        socket.emit('loadMessHistory', user);
     });
 
     socket.on('registrIsSuccess', function() {
@@ -56,29 +56,34 @@ app.controller('appController', function($scope) {
     });
 
     socket.on('messHistory', function(messages, user) {
-        var userTime = user[0].date;;
-
         vm.mess.splice(0, vm.mess.length);
-    
+
+        var userTime = user[0].date;
+
         for(var i = 0; i < messages.length; i++) {
             var check = (userTime < messages[i].date);
-        
-            if(messages[i].id != 'none' && messages[i].userName == user[0].userName && check) {
-                vm.mess.push({
-                    name: messages[i].userName,
-                    text: messages[i].userMess,
-                    me: true,
-                    id: vm.count, 
-                    date: messages[i].date
-                });
-                vm.count++;
+
+            if( (messages[i].userName == user[0].userName) && (check) ) {
+                if(messages[i].delete == true) {
+                    vm.count++;
+                } else {
+                    vm.mess.push({
+                        name: messages[i].userName,
+                        text: messages[i].userMess,
+                        me: true,
+                        id: messages[i].id,
+                        date: messages[i].date
+                    });
+                    vm.count++;
+                }  
             };
-            if(messages[i].userName != user[0].userName && check) {
+
+            if( (messages[i].userName != user[0].userName) && (messages[i].delete == false) && (check) ) {
                 vm.mess.push({
                     name: messages[i].userName,
                     text: messages[i].userMess,
                     me: false,
-                    id: 'none',
+                    id: 'none' + messages[i].id,
                     date: messages[i].date
                 });
             };
@@ -88,46 +93,65 @@ app.controller('appController', function($scope) {
 
     vm.sendMess = function() {
         var dateNow = new Date().toString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-        if(vm.yourMess.length != 0) { //bug!!!
-            socket.emit('message', {message: vm.yourMess, name: vm.yourLogin, time: dateNow});
+        //bug!!!!!!!!!!
+        if(vm.yourMess.length !== 0) { 
+            socket.emit('message', {mess: vm.yourMess, name: vm.yourLogin, me: true, id: vm.count, time: dateNow});
+            vm.count++;
         }
         vm.yourMess = "";
     };
 
     socket.on('messageToMe', function(data) {
         vm.mess.push({
-            name: data.name,
-            text: data.message,
+            name: data.userName,
+            text: data.userMess,
             me: true,
-            id: vm.count,
-            date: data.time
+            id: data.id,
+            date: data.date
         });
-        socket.emit('messageToSave', {userName: data.name, userMess: data.message, me: true, id: vm.count, date: data.time});
-        vm.count++;
         $scope.$apply();
     });
 
     socket.on('messageToAll', function(data) {
         vm.mess.push({
-            name: data.name,
-            text: data.message,
+            name: data.userName,
+            text: data.userMess,
             me: false,
-            id: 'none',
-            date: data.time
+            id: 'none' + data.id,
+            date: data.date
         });
         $scope.$apply();
     });
 
-    /*socket.on('deleteMess', function(message) {
-        vm.mess.splice(message[0].id, 1, {name: 'Сообщение удалено', del: true});
+    
+    socket.on('deleteMessToMe', function(message) {
+        for(var i = 0; i < vm.mess.length; i++) {
+            if(vm.mess[i].id == message[0].id) {
+                vm.mess[i].text = 'Сообщение удалено';
+                vm.mess[i].del = true;
+                delete vm.mess[i].me;
+                delete vm.mess[i].id;
+            }
+        }
         $scope.$apply();
-    })
+    });
+
+    socket.on('deleteMessToAll', function(message) {
+        for(var i = 0; i < vm.mess.length; i++) {
+            if(vm.mess[i].id == ('none' + message[0].id) && vm.mess[i].name == message[0].userName) {
+                vm.mess[i].text = 'Сообщение удалено';
+                vm.mess[i].del = true;
+                delete vm.mess[i].me;
+                delete vm.mess[i].id;
+            }
+        }
+        $scope.$apply();
+    });
 
     vm.setDelMess = function(getId) {
-        var indexToRemove = vm.mess.findIndex(obj => obj.id == getId);
-        socket.emit('deleteMess', indexToRemove);
-        $scope.$apply();
-    };*/
+        console.log(getId);
+        socket.emit('deleteMess', getId, vm.yourLogin);
+    };
 });
 
 
