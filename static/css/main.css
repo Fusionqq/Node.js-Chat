@@ -1,0 +1,356 @@
+body {
+    font-family: Ubuntu, sans-serif;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: url('pic/pat3.svg');
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;  
+}
+
+@font-face {
+    font-family: quentin;
+    src: url('fonts/Quentin.otf'); 
+}
+
+/*Authorization page*/
+
+#caption {
+    text-align: center;
+    position: relative;
+    margin-top: 7%;
+    margin-left: auto; 
+    margin-right: auto;
+}
+    
+#caption > p {
+    font-family: quentin;
+    font-size: 80px;
+    font-weight: 400;
+    color: #4F6B72;
+    margin: 0;
+}
+
+#loginBlock {
+    background-color: rgba(255, 255, 255, 1);
+    position: relative;
+    margin-left: auto; 
+    margin-right: auto;
+    margin-bottom: 10px;
+    padding: 15px;
+    border: 1px solid  rgba(192, 192, 192, 0.9);
+    border-radius: 3px;
+}
+
+@media (min-width: 200px) and (max-width: 370px) {
+    #loginBlock {
+        width: 300px;
+    }
+    #caption > p {
+        font-size: 70px;
+    }
+}
+
+@media (min-width: 370px) and (max-width: 550px) {
+    #loginBlock {
+        width: 350px;
+    }
+}
+
+@media (min-width: 550px) and (max-width: 850px) {
+    #loginBlock {
+        width: 390px;
+    }
+}
+
+@media (min-width: 850px) and (max-width: 1300px) {
+    #loginBlock {
+        width: 400px;
+    }
+}
+
+@media (min-width: 1300px) {
+    #loginBlock {
+        width: 410px;
+    }
+}
+
+#nav {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#nav > li {
+    float: none;
+    display: inline-block;
+    margin: 5px 5px 5px 5px;
+}
+
+#nav > li > a {
+    padding: 5px 18px;
+    font-weight: 700;
+    font-size: 23px;
+    border-radius: 0;
+    color: rgba(192, 192, 192, 0.6);
+    background-color: rgba(255, 255, 255, 0);
+    border-bottom: 2px solid rgba(255, 255, 255, 0);
+    transition: all 0.4s ease-out;
+    -webkit-transition: all 0.4s ease-out;
+    -moz-transition: all 0.4s ease-out;
+    -ms-transition: all 0.4s ease-out;
+    -o-transition: all 0.4s ease-out;
+    -webkit-appearance: none; 
+}
+
+#nav > li.active > a {
+    background-color: rgba(255, 255, 255, 0);
+    border-bottom: 2px solid rgb(127, 182, 215);
+    border-radius: 1px;
+    color: rgb(127, 182, 215);
+}
+
+.authInput {
+    width: 90%;
+    padding: 12px;
+    border: 2px solid #e2e2e2;
+    border-radius: 3px;
+    margin: 20px;
+    font-size: 14px;
+    color: black;
+    outline: none;
+}
+
+input::-webkit-input-placeholder       {opacity: 0.9; transition: opacity 0.3s ease; color: #7a7a7a;}
+input::-moz-placeholder                {opacity: 0.9; transition: opacity 0.3s ease; color: #7a7a7a;}
+input:-moz-placeholder                 {opacity: 0.9; transition: opacity 0.3s ease; color: #7a7a7a;}
+input:-ms-input-placeholder            {opacity: 0.9; transition: opacity 0.3s ease; color: #7a7a7a;}
+input:focus::-webkit-input-placeholder {opacity: 0.4; transition: opacity 0.3s ease; color: #7a7a7a;}
+input:focus::-moz-placeholder          {opacity: 0.4; transition: opacity 0.3s ease; color: #7a7a7a;}
+input:focus:-moz-placeholder           {opacity: 0.4; transition: opacity 0.3s ease; color: #7a7a7a;}
+input:focus:-ms-input-placeholder      {opacity: 0.4; transition: opacity 0.3s ease; color: #7a7a7a;}
+
+.enter {
+    border: 0;
+    border-radius: 3px;
+    padding: 12px 20px;
+    margin: 15px auto 5px auto;
+    display: block;
+    font-size: 15px;
+    color: #fff;
+    background: rgb(127, 182, 215);
+    outline: none;
+    transition: 0.5s all;
+    -webkit-transition: 0.5s all;
+    -moz-transition: 0.5s all;
+    -o-transition: 0.5s all;
+    -ms-transition: 0.5s all;
+}
+
+.enter:hover {
+    background-color: rgb(67, 138, 191);
+}
+
+.enter:active, .enter:focus {
+    outline: none !important;
+}
+
+#infoBlock {
+    font-size: 18px;
+    color: gray;
+    position: relative;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 25px;
+    text-align: center;
+    opacity: 1;
+}
+
+/* #infoBlock.ng-hide-add {
+    transition: all 0.1s ease-out;
+    -webkit-transition: all 0.1s ease-out;
+    -moz-transition: all 0.1s ease-out;
+    -ms-transition: all 0.1s ease-out;
+    -o-transition: all 0.1s ease-out;
+    -webkit-appearance: none;
+     
+} */
+
+#infoBlock.ng-hide-remove {
+    transition: all 0.3s ease-out;
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    -webkit-appearance: none;
+}
+
+#infoBlock.ng-hide {
+   opacity: 0;
+} 
+ 
+/*Chat page*/
+
+#chatBlock {
+    position: relative;
+    color: #4F6B72;
+    /* font-family: "PT Sans", Verdana, Arial, sans-serif;
+    font-size: 13px; */
+    
+}
+
+#usersWindow {
+    padding-left : 15px;
+    padding-right : 15px;
+}
+
+#usersList {
+    height: 300px;
+    /* border: 1px solid #4F6B72; */
+    border-radius: 4px; 
+    background-color: #F5F5F5;
+}
+
+#myName {
+    color: white;
+    font-weight: 500;
+    font-size: 17px;
+    text-align: center;
+    padding: 15px;
+    border: 1px solid rgb(127, 182, 215);
+    border-radius: 3px;
+    background-color: rgb(127, 182, 215);
+    -webkit-box-shadow: 0px 2px 5px 1px rgba(0,0,0,0.35);
+    -moz-box-shadow: 0px 2px 5px 1px rgba(0,0,0,0.35);
+    box-shadow: 0px 2px 5px 1px rgba(0,0,0,0.35);
+}
+
+#onlineCounter {
+    margin: 5px;
+}
+
+.onlineImg {
+    width: 8px;
+    height: 8px;
+    border-radius: 50px;
+}
+
+#usersOnline {
+    margin: 5px;
+    padding: 15px;
+    border: 1px solid rgba(127, 182, 215, 0.4);
+    border-radius: 2px;
+    background-color: white;
+}
+
+#messagesWindow {
+    padding-right: 0;
+}
+
+#messagesList {
+    background-color: white;
+    height: 350px;
+    border-radius: 3px;
+    border: 1px solid #4F6B72;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track-piece{
+  background-color: #ffffff;
+  -webkit-border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:vertical{
+  height: 5px;
+  background-color: #4F6B72;
+  -webkit-border-radius: 5px;
+}
+
+.sendMess {
+    width: 25%;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    -moz-box-sizing:border-box;
+    -o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    border: 1px solid #DDD;
+    margin-top: 2px;
+}
+
+#password.invalid {
+    box-shadow: 0 0 10px 0 red;
+    -webkit-box-shadow: 0 0 10px 0 red;
+    -moz-box-shadow: 0 0 10px 0 red;
+    border: 1px solid #F55;
+}
+
+.nick {
+    text-align: center;
+    width: 100%;
+}
+
+ 
+#message_text {
+    padding: 20px 40px;
+    box-sizing: border-box;
+    -moz-box-sizing:border-box;
+    -o-box-sizing:border-box;
+    -ms-box-sizing:border-box;
+    border: 1px solid #DDD;
+    width: 65%;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.msgMe {
+    margin: 5px;
+    border: 1px solid;
+    width: 50%;
+    border-radius: 10px;
+    padding: 6px;
+    border-color: red;
+}
+
+.msgAll {
+    margin: 5px;
+    border: 1px solid;
+    width: 50%;
+    border-radius: 10px;
+    padding: 6px;
+    border-color: gray;
+}
+
+.msgDel {
+    background-color: orange;
+    margin: 5px;
+    border: 1px solid;
+    width: 50%;
+    border-radius: 10px;
+    padding: 6px;
+    border-color: orange;
+    transition: all 0.3s ease-out; 
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    -webkit-appearance: none;
+}
+
+.delBut {
+    display: inline-block;
+    margin-left: 90%;
+    width: 15px;
+    height: 15px;
+    border-radius: 10px;
+}

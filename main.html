@@ -1,52 +1,96 @@
 <!DOCTYPE html>
 <html ng-app="myApp">
     <head>
-        <link href="static/main.css" rel="stylesheet"/>
-        <!--<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>-->
-        <!--<script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>-->
-        <script src="node_modules/angular/angular.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="static/client.js"></script>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link href="static/css/main.css" rel="stylesheet"/>
+        <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+        <!-- <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script> -->
+        <!-- <script src="static/style.js"></script>
+        <script src="node_modules/trianglify/dist/trianglify.min.js"></script> -->
+        <script src="node_modules/angular/angular.js"></script>
+        <script src="node_modules/angular-animate/angular-animate.js"></script>
+        <script src="node_modules/angular-route/angular-route.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="static/js/client.js"></script>
     </head>
-    <body ng-controller="appController as chat">
-        <div id="loginform" class="unauthorized" ng-hide="chat.hideLogPage">
-            <h1>Hello {{ chat.yourLogin }} !</h1>  
-            <input id="login" placeholder="Логин" ng-model="chat.yourLogin"><br>
-            <input id="password" placeholder="Пароль" ng-model="chat.yourPass"><br>
-            <button class="start" ng-click="chat.enterToChat()">Войти</button>
-            <button class="start" ng-click="chat.registrToChat()">Регистрация</button>
-            <div ng-show="chat.authError">{{chat.loginStatusInfo}}</div>
-        </div>
- 
-        <div class="demo" ng-show="chat.showChatPage">
-            <h1>Chat</h1>
-            
-            <div class="chatWindow">
-                <div>Users online: {{chat.countOnline}}</div>
-                <div ng-repeat="on in chat.usersOnline">
-                    {{on.name}} {{on.online}}
+    <body ng-controller="appController as chat" id="body">
+        
+        <!-- Login page -->
+     
+        <!-- class="col-sm-6 col-sm-offset-3 col-xs-10 col-xs-offset-1 col-md-4 col-md-offset-4 col-lg-4 col-lg-offset-4" -->
+            <div id="caption"><p>Messenger</p></div>
+
+            <div id="loginBlock" ng-hide="chat.hideLogPage">
+
+                <ul class="nav nav-pills" id="nav">
+                    <li ng-class="{ active: chat.isSet(1) }">
+                        <a href ng-click="chat.setTab(1)">Sign in</a>
+                    </li>
+                    <li ng-class="{ active: chat.isSet(2) }">
+                        <a href ng-click="chat.setTab(2)">Sign up</a>
+                    </li>
+                </ul>
+
+                <div ng-show="chat.isSet(1)">
+                    <input class="authInput center-block" id="login" placeholder="Login" autocomplete="off" ng-model="chat.yourLogin" ng-focus="chat.changeInput()">
+                    <input class="authInput center-block" id="password" type="password" placeholder="Password" ng-model="chat.yourPass" ng-focus="chat.changeInput()">
+                    <button class="enter" ng-click="chat.enterToChat()">Sign in</button>   
                 </div>
 
-                <div class="messages" id="messages">
-                    <div ng-repeat="m in chat.mess">
-                        <div>
-                            <div ng-class="{ 'msgMe' : m.me, 'msgAll' : !m.me, 'msgDel' : m.del}">
-                                <span ng-bind="m.date"></span>
-                                <span ng-bind="m.name"></span>
-                                <span ng-bind="m.text"></span>
-                                <span ng-bind="m.id"></span>
-                                <button ng-hide="!m.me" ng-click='chat.setDelMess(m.id)'></button>
-                            </div>
-                        </div>
-                    </div>
+                <div ng-show="chat.isSet(2)">
+                    <input class="authInput center-block" id="login" placeholder="Login" autocomplete="off" ng-model="chat.yourLogin" ng-focus="chat.changeInput()">
+                    <input class="authInput center-block" id="password" type="password" placeholder="Password" ng-model="chat.yourPass" ng-focus="chat.changeInput()">
+                    <input class="authInput center-block" id="password" type="password" placeholder="Confirm password" ng-model="chat.yourConfirmPass" ng-focus="chat.changeInput()">
+                    <button class="enter" ng-click="chat.registrToChat()">Create Account</button>
                 </div>
             </div>
-            <div class="nick" ng-bind="chat.yourLogin"></div>
-                <div class="panel">
-                    <input type="text" id="message_text" ng-model="chat.yourMess">
-                    <button type="button" id="message_btn" class="sendMess" ng-click="chat.sendMess()">Отправить</button>
-                </div>
-        </div>
+
+            <div id="infoBlock" ng-show="chat.authError">{{ chat.loginStatusInfo }}</div>
+
+            <base href='/'>
+            <a href="test">test</a>
+
+            <div ng-view></div>
+
+
+        <!-- Chat page -->
+       <div id="chatBlock" class="container" ng-show="chat.showChatPage" >
+       
+           <div class="row">
+               <div id="messagesWindow" class="col-xs-8">
+                   <div id="messagesList">
+                       <div ng-repeat="m in chat.mess">
+                           <div>
+                               <div ng-class="{ 'msgMe' : m.me, 'msgAll' : !m.me, 'msgDel' : m.del }">
+                                   <span ng-bind="m.date"></span>
+                                   <span ng-bind="m.name"></span>
+                                   <span ng-bind="m.text"></span>
+                                   <span ng-bind="m.id"></span>
+                                   <button class="delBut" ng-hide="!m.me" ng-click='chat.setDelMess(m.id)'></button> 
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           
+               <div id="usersWindow" class="col-xs-4">
+                   
+                   <div id="usersList">
+                       <div id="myName">{{ chat.myLogin }} Online</div>
+                       <div id="onlineCounter">Users online: {{ chat.countOnline - 1 }}</div>
+                       <div id="usersOnline" ng-repeat="on in chat.usersOnline | filterByName : chat.myLogin">
+                           <span>{{ on.name }}</span>
+                           <img class="onlineImg" ng-src="{{ on.online }}"/>
+                       </div>
+                   </div>
+               </div>
+       
+               <div class="col-xs-10 col-xs-offset-1">
+                   <input type="text" id="message_text" ng-model="chat.yourMess">
+                   <button type="button" id="message_btn" class="sendMess" ng-click="chat.sendMess()">Send</button>
+               </div>
+           </div>
+       </div>
     </body>
 </html>

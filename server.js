@@ -3,7 +3,7 @@ var PORT = 8008;
 var express = require('express'); 
 var app = express();
 var server = require('http').Server(app); 
-var io = require('socket.io')(server); 
+var io = require('socket.io')(server);
 
 server.listen(PORT, function() {
     console.log('listening at port ' + PORT);
@@ -11,8 +11,8 @@ server.listen(PORT, function() {
 
 app.use('/static', express.static(__dirname + '/static'));
 app.use('/node_modules', express.static(__dirname + '/node_modules'));
- 
-app.get('/', function (req, res) {
+
+app.get('*', function (req, res) {
     res.sendfile(__dirname + '/main.html');
 });
 
@@ -46,7 +46,7 @@ var modelU = mongoose.model('modelUser', userSchema);
 var modelMess = mongoose.model('modelMessages', usersMessageSchema);
 
 function findUser (user, callback) {
-    modelU.find({userName: user}, function (err, users) {
+    modelU.find({ userName: user }, function (err, users) {
         callback(users.length !== 0);
     });
 };
@@ -54,7 +54,7 @@ function findUser (user, callback) {
 function checkUser (user, password, callback) {
     findUser(user, function (found) {
         if (found) {
-            modelU.find({userName: user}, function (err, users) {
+            modelU.find({ userName: user }, function (err, users) {
                 if(users[0].userPass  === password) {
                     callback(true);
                 } else {
@@ -67,18 +67,22 @@ function checkUser (user, password, callback) {
     });
 };
 
-function registrUser (user, callback) {
+function registrUser (user, pass, confirmPass, callback) {
     findUser(user, function (found) {
         if (found) {
-            callback(false);
+            callback('user exists');
         } else {
-            callback (true);
+            if(pass == confirmPass) {
+                callback('yes');
+            } else {
+                callback('no')
+            }
         }
     });
 };
 
 function checkUserOnline (user, password, callback) {
-    modelU.find({userName: user}, function (err, users) {
+    modelU.find({ userName: user }, function (err, users) {
         if(users.length == 0) {
             callback(false);
         };
@@ -118,7 +122,7 @@ io.on('connection', function (client) {
         });
     });
 
-    client.on('authentication', function(info) { 
+    client.on('authorization', function(info) { 
         checkUserOnline (info.login, info.password, function (success) {
             if(!success) {
                 checkUser(info.login, info.password, function(success) {
@@ -141,8 +145,8 @@ io.on('connection', function (client) {
                                     if (err) {
                                         return handleError(err);
                                     } else {
-                                        client.emit('onlineUserList', users);
-                                        client.broadcast.emit('onlineUserList', users);
+                                        client.emit('onlineUsersList', users);
+                                        client.broadcast.emit('onlineUsersList', users);
                                     };
                                 });
                             };
@@ -157,7 +161,7 @@ io.on('connection', function (client) {
                                         if (err) {
                                             return handleError(err);
                                         } else {
-                                            client.broadcast.emit('onlineUserList', users);
+                                            client.broadcast.emit('onlineUsersList', users);
                                         };
                                     }); 
                                 };
@@ -165,18 +169,18 @@ io.on('connection', function (client) {
                         });
 
                     } else {
-                        client.emit('authIsNotSuccess', 'Неверное имя или пароль');
+                        client.emit('authIsNotSuccess', 'Invalid username or password');
                     }
                 });
             } else {
-                client.emit('authIsNotSuccess', 'Вы уже online');
+                client.emit('authIsNotSuccess', 'Are you online');
             }
         });
     });
 
     client.on('registration', function(info) {
-        registrUser(info.login, function(success) {
-            if(success) {
+        registrUser(info.login, info.password, info.confirmPass, function(success) {
+            if(success == 'yes') {
 
                 client.emit('registrIsSuccess');
 
@@ -190,8 +194,8 @@ io.on('connection', function (client) {
                             if (err) {
                                 return handleError(err);
                             } else {
-                                client.emit('onlineUserList', users);
-                                client.broadcast.emit('onlineUserList', users);
+                                client.emit('onlineUsersList', users);
+                                client.broadcast.emit('onlineUsersList', users);
                             };
                         });
                     };
@@ -206,15 +210,18 @@ io.on('connection', function (client) {
                                 if (err) {
                                     return handleError(err);
                                 } else {
-                                    client.broadcast.emit('onlineUserList', users);
+                                    client.broadcast.emit('onlineUsersList', users);
                                 };
                             });
                         };  
                     });             
                 });
-
-            } else {
-                client.emit('authIsNotSuccess', 'Имя занято');
+ 
+            } else if(success == 'user exists') {
+                client.emit('authIsNotSuccess', 'Login ' + info.login.replace(info.login.charAt(0), info.login.charAt(0).toUpperCase())
+                + ' already in use, please choose another one');
+            } else if(success == 'no') {
+                client.emit('authIsNotSuccess', 'Password and confirmed password do not match');
             }
         });
     });

@@ -5,9 +5,13 @@
   "main": "server.js",
   "dependencies": {
     "angular": "^1.6.4",
+    "angular-animate": "^1.6.3",
+    "angular-route": "^1.6.4",
+    "bootstrap": "^3.3.7",
     "express": "^4.15.2",
     "mongoose": "^4.9.4",
-    "socket.io": "^1.7.3"
+    "socket.io": "^1.7.3",
+    "trianglify": "^1.0.1"
   },
   "devDependencies": {},
   "scripts": {

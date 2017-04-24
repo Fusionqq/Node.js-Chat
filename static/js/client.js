@@ -1,5 +1,28 @@
-var app = angular.module('myApp', []);
+var app = angular.module('myApp', ['ngAnimate', 'ngRoute']);
 var socket = io.connect();
+
+app.config(['$routeProvider', '$locationProvider',
+    function($routeProvider, $locationProvider) {
+    
+    $routeProvider
+    .when('/test', {
+        templateUrl: 'static/views/test.html'
+    });
+    $locationProvider.html5Mode(true);  
+}]);
+
+app.filter('filterByName', function () {
+  return function (items, nick) {
+    var filtered = [];
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (items[i].name != nick) {
+            filtered.push(item);
+        }
+    }
+    return filtered;
+  };
+});
 
 app.controller('appController', function($scope) {
     var vm = this;
@@ -7,16 +30,43 @@ app.controller('appController', function($scope) {
     vm.countOnline = 0;
     vm.mess = [];
     vm.usersOnline = [];
+    vm.yourMess = '';
+    vm.yourLogin = '';
+    vm.yourPass = '';
+    vm.tab = 1;
+
+    vm.changeInput = function() {
+        vm.authError = false; 
+    };
+
+    vm.setTab = function(newValue) {
+        vm.yourLogin = '';
+        vm.yourPass = '';
+        vm.authError = false;
+        vm.tab = newValue;
+    };
+
+    vm.isSet = function(tabName) {
+        return vm.tab === tabName;
+    };
 
     vm.registrToChat = function() {
         var dateNow = new Date().toString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-        socket.emit('registration', {password: vm.yourPass, login: vm.yourLogin, date: dateNow});
-        //добавить проверку пустой строки
+
+        if(vm.yourLogin.length !== 0 && vm.yourPass.length !== 0) {
+            vm.yourLogin = vm.yourLogin.toLowerCase();
+            vm.myLogin = vm.yourLogin.replace(vm.yourLogin.charAt(0), vm.yourLogin.charAt(0).toUpperCase());
+            socket.emit('registration', { password: vm.yourPass, confirmPass: vm.yourConfirmPass, login: vm.yourLogin.toLowerCase(), date: dateNow });
+        } else {
+            vm.authError = true;
+            vm.loginStatusInfo = "Don't use an empty name or password";
+        }
     };
 
     vm.enterToChat = function() {
-        socket.emit('authentication', {password: vm.yourPass, login: vm.yourLogin});
-       //добавить проверку пустой строки
+        vm.yourLogin = vm.yourLogin.toLowerCase();
+        vm.myLogin = vm.yourLogin.replace(vm.yourLogin.charAt(0), vm.yourLogin.charAt(0).toUpperCase());
+        socket.emit('authorization', { password: vm.yourPass, login: vm.yourLogin.toLowerCase() });
     };
 
     socket.on('authIsSuccess', function(user) {
@@ -40,18 +90,25 @@ app.controller('appController', function($scope) {
         $scope.$apply();
     });
 
-    socket.on('onlineUserList', function(users) {
+    socket.on('onlineUsersList', function(users) {
         vm.usersOnline.splice(0, vm.usersOnline.length);
+        vm.countOnline = 0;
 
         for(var i = 0; i < users.length; i++) {
             if(users[i].online == true) {
                 vm.usersOnline.push({
-                    name: users[i].userName,
-                    online: 'online'
+                    name: users[i].userName.replace(users[i].userName.charAt(0), users[i].userName.charAt(0).toUpperCase()),
+                    online: 'static/css/pic/online.png'
+                });
+                vm.countOnline++;
+            }
+            if(users[i].online == false) {
+                vm.usersOnline.push({
+                    name: users[i].userName.replace(users[i].userName.charAt(0), users[i].userName.charAt(0).toUpperCase()),
+                    online: 'static/css/pic/offline.png'
                 });
             }
         }
-        vm.countOnline = vm.usersOnline.length;
         $scope.$apply();
     });
 
@@ -68,7 +125,7 @@ app.controller('appController', function($scope) {
                     vm.count++;
                 } else {
                     vm.mess.push({
-                        name: messages[i].userName,
+                        name: messages[i].userName.replace(messages[i].userName.charAt(0), messages[i].userName.charAt(0).toUpperCase()),
                         text: messages[i].userMess,
                         me: true,
                         id: messages[i].id,
@@ -80,7 +137,7 @@ app.controller('appController', function($scope) {
 
             if( (messages[i].userName != user[0].userName) && (messages[i].delete == false) && (check) ) {
                 vm.mess.push({
-                    name: messages[i].userName,
+                    name: messages[i].userName.replace(messages[i].userName.charAt(0), messages[i].userName.charAt(0).toUpperCase()),
                     text: messages[i].userMess,
                     me: false,
                     id: 'none' + messages[i].id,
@@ -93,9 +150,9 @@ app.controller('appController', function($scope) {
 
     vm.sendMess = function() {
         var dateNow = new Date().toString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-        //bug!!!!!!!!!!
+
         if(vm.yourMess.length !== 0) { 
-            socket.emit('message', {mess: vm.yourMess, name: vm.yourLogin, me: true, id: vm.count, time: dateNow});
+            socket.emit('message', {mess: vm.yourMess, name: vm.yourLogin.toLowerCase(), me: true, id: vm.count, time: dateNow});
             vm.count++;
         }
         vm.yourMess = "";
@@ -103,7 +160,7 @@ app.controller('appController', function($scope) {
 
     socket.on('messageToMe', function(data) {
         vm.mess.push({
-            name: data.userName,
+            name: data.userName.replace(data.userName.charAt(0), data.userName.charAt(0).toUpperCase()),
             text: data.userMess,
             me: true,
             id: data.id,
@@ -114,7 +171,7 @@ app.controller('appController', function($scope) {
 
     socket.on('messageToAll', function(data) {
         vm.mess.push({
-            name: data.userName,
+            name: data.userName.replace(data.userName.charAt(0), data.userName.charAt(0).toUpperCase()),
             text: data.userMess,
             me: false,
             id: 'none' + data.id,
@@ -127,19 +184,20 @@ app.controller('appController', function($scope) {
     socket.on('deleteMessToMe', function(message) {
         for(var i = 0; i < vm.mess.length; i++) {
             if(vm.mess[i].id == message[0].id) {
-                vm.mess[i].text = 'Сообщение удалено';
+                vm.mess[i].text = 'Message delete';
                 vm.mess[i].del = true;
                 delete vm.mess[i].me;
-                delete vm.mess[i].id;
+                delete vm.mess[i].id; 
             }
         }
         $scope.$apply();
     });
 
     socket.on('deleteMessToAll', function(message) {
+        var a = message[0].userName.replace(message[0].userName.charAt(0), message[0].userName.charAt(0).toUpperCase());
         for(var i = 0; i < vm.mess.length; i++) {
-            if(vm.mess[i].id == ('none' + message[0].id) && vm.mess[i].name == message[0].userName) {
-                vm.mess[i].text = 'Сообщение удалено';
+            if(vm.mess[i].id == ('none' + message[0].id) && vm.mess[i].name == a) {
+                vm.mess[i].text = 'Message delete';
                 vm.mess[i].del = true;
                 delete vm.mess[i].me;
                 delete vm.mess[i].id;
@@ -150,7 +208,7 @@ app.controller('appController', function($scope) {
 
     vm.setDelMess = function(getId) {
         console.log(getId);
-        socket.emit('deleteMess', getId, vm.yourLogin);
+        socket.emit('deleteMess', getId, vm.yourLogin.toLowerCase());
     };
 });
 
