@@ -1,15 +1,18 @@
 var app = angular.module('myApp', ['ngAnimate', 'ngRoute']);
 var socket = io.connect();
 
-app.config(['$routeProvider', '$locationProvider',
+/*app.config(['$routeProvider', '$locationProvider',
     function($routeProvider, $locationProvider) {
     
     $routeProvider
+    .when('/', {
+        templateUrl: 'static/views/login.html'
+    })
     .when('/test', {
-        templateUrl: 'static/views/test.html'
+        templateUrl: 'static/views/chat.html'
     });
-    $locationProvider.html5Mode(true);  
-}]);
+    $locationProvider.html5Mode(true).hashPrefix('!');
+}]);*/
 
 app.filter('filterByName', function () {
   return function (items, nick) {
@@ -34,6 +37,14 @@ app.controller('appController', function($scope) {
     vm.yourLogin = '';
     vm.yourPass = '';
     vm.tab = 1;
+
+    /*vm.chMessIn= function() {
+        for(var i = 0; i < vm.usersOnline.length; i++) {
+            if(vm.usersOnline[i].name == vm.myLogin) {
+                vm.usersOnline[i].kek = 'kek';
+            }
+        }
+    };*/
 
     vm.changeInput = function() {
         vm.authError = false; 
@@ -74,6 +85,7 @@ app.controller('appController', function($scope) {
         vm.authError = false;
         vm.hideLogPage = true;
         vm.showChatPage = true;
+        $scope.$apply();
     });
 
     socket.on('registrIsSuccess', function() {
@@ -132,6 +144,7 @@ app.controller('appController', function($scope) {
                         date: messages[i].date
                     });
                     vm.count++;
+                    $scope.$apply();
                 }  
             };
 
@@ -143,9 +156,9 @@ app.controller('appController', function($scope) {
                     id: 'none' + messages[i].id,
                     date: messages[i].date
                 });
+                $scope.$apply();
             };
         };
-        $scope.$apply();
     });
 
     vm.sendMess = function() {
@@ -186,7 +199,7 @@ app.controller('appController', function($scope) {
             if(vm.mess[i].id == message[0].id) {
                 vm.mess[i].text = 'Message delete';
                 vm.mess[i].del = true;
-                delete vm.mess[i].me;
+                vm.mess[i].me = true;
                 delete vm.mess[i].id; 
             }
         }
@@ -199,7 +212,7 @@ app.controller('appController', function($scope) {
             if(vm.mess[i].id == ('none' + message[0].id) && vm.mess[i].name == a) {
                 vm.mess[i].text = 'Message delete';
                 vm.mess[i].del = true;
-                delete vm.mess[i].me;
+                vm.mess[i].me = false;
                 delete vm.mess[i].id;
             }
         }
