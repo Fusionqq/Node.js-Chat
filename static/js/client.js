@@ -106,6 +106,12 @@ app.controller('appController', function($scope) {
         vm.usersOnline.splice(0, vm.usersOnline.length);
         vm.countOnline = 0;
 
+        if(users.length == 1) {
+            vm.usersOnline.push({
+                name: 'No users'
+            });
+        };
+
         for(var i = 0; i < users.length; i++) {
             if(users[i].online == true) {
                 vm.usersOnline.push({
